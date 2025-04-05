@@ -1,0 +1,57 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid darkgrey;
+    border-radius: 8px;
+    padding: 25px;
+    background-image: url('/images/depositphotos_654192190-stock-photo-summer-flat-lay-background-tropical.webp');
+    background-size: cover;
+    background-position: center; 
+    background-blend-mode: overlay;
+    background-color: rgba(250, 248, 249, 0.5);
+    margin-bottom: 20px;
+
+}
+
+
+.label {
+    
+    font-size: 16px;
+    margin-bottom: 8px; /* Відступ між лейблом та інпутом */
+}
+
+.field {
+    margin-bottom: 15px;
+    border: 1px solid darkgrey;
+    border-radius: 5px;
+    padding: 8px;
+}
+
+.field:hover{
+    border-color:  #528989;
+}
+
+.field:last-of-type {
+    margin-bottom: 20px;
+}
+
+.btn {
+    
+    margin-top: 20px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 120px;
+    
+}
+
+.btn:hover,
+.btn:focus {
+    box-shadow: none;
+
+}
+
+.error{
+    padding-bottom: 10px;
+    color: brown;
+}

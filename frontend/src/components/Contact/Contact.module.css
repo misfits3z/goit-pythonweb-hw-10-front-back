@@ -1,0 +1,43 @@
+.contact {
+    display: flex; 
+    align-items: center; 
+    padding: 10px;
+    border: 1px solid #ccc; 
+    border-radius: 8px;
+    gap: 50px;
+    background-color: #f4eaf0;
+}
+
+.card {
+    display: flex; 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 15px;
+ 
+    
+}
+.card p{
+    margin: 0;
+}
+
+.icon{
+    padding-right: 8px;
+}
+
+button{
+    background-color: #e1f0f0;
+    border: 1px solid #9dcdcd;
+    margin-left: auto;
+    
+}
+/* #afdbdb; */
+button:hover,
+button:focus{
+    background-color: #afdbdb;
+    border-color: #528989;
+    outline: none;
+}
+
+button:focus-visible {
+    outline: none; 
+}
