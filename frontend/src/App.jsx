@@ -5,6 +5,7 @@ import ContactForm from './components/ContactForm/ContactForm';
 import './App.css';
 import { useDispatch } from 'react-redux';
 import { selectContacts } from './redux/contactsSlice';
+import Header from './components/Header/Header';
 // import { addContact, deleteContact } from './redux/contactSlice'; 
 // import { changeFilter } from './redux/filtersSlice'; 
 
@@ -21,6 +22,7 @@ function App() {
 
   return (
     <div>
+      <Header/>
       <h1>Phonebook</h1>
       <ContactForm />
       <SearchBox />
