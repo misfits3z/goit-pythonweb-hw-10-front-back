@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from repository.contacs import ContactRepository
+from src.repository.contacs import ContactRepository
 from src.schemas import ContactCreate
 from src.database.models import User
 

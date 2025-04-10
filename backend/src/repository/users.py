@@ -34,3 +34,11 @@ class UserRepository:
         await self.db.commit()
         await self.db.refresh(user)
         return user
+
+    async def update_avatar(self, user_id: int, new_avatar: str) -> User | None:
+        user = await self.get_user_by_id(user_id)
+        if user:
+            user.avatar = new_avatar
+            await self.db.commit()
+            await self.db.refresh(user)
+        return user
