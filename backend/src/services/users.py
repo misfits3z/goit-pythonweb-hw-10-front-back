@@ -8,13 +8,14 @@ import aiosmtplib
 from email.mime.text import MIMEText
 from src.conf.config import config
 from src.utils.tokens import generate_verification_token
+from src.database.models import UserRole
 
 
 class UserService:
     def __init__(self, db: AsyncSession):
         self.repository = UserRepository(db)
 
-    async def create_user(self, body: UserCreate):
+    async def create_user(self, body: UserCreate, role: UserRole = UserRole.USER):
         avatar = None
         try:
             g = Gravatar(body.email)
@@ -22,7 +23,7 @@ class UserService:
         except Exception as e:
             print(e)
 
-        user = await self.repository.create_user(body, avatar)
+        user = await self.repository.create_user(body, avatar, role)
 
         # Генеруємо verification token
         token = await generate_verification_token(body.email)

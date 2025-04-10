@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
-from src.api import utils, contacts, auth_router, users
+from src.api import utils, contacts, auth_router, users, create_admin
 import os
 
 app = FastAPI(debug=True)
@@ -37,6 +37,7 @@ app.include_router(auth_router.router, prefix="/auth")
 app.include_router(utils.router, prefix="/api")
 app.include_router(contacts.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
+app.include_router(create_admin.router, prefix="/api")
 
 HOST = os.getenv("HOST", "127.0.0.1")
 PORT = int(os.getenv("PORT", 8000))

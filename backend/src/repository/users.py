@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database.models import User
+from src.database.models import User, UserRole
 from src.schemas import UserCreate
 
 
@@ -24,11 +24,12 @@ class UserRepository:
         user = await self.db.execute(stmt)
         return user.scalar_one_or_none()
 
-    async def create_user(self, body: UserCreate, avatar: str = None) -> User:
+    async def create_user(self, body: UserCreate, avatar: str, role: UserRole) -> User:
         user = User(
             **body.model_dump(exclude_unset=True, exclude={"password"}),
             hashed_password=body.password,
             avatar=avatar,
+            role=role
         )
         self.db.add(user)
         await self.db.commit()

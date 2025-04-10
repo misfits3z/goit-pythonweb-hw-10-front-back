@@ -36,3 +36,10 @@ services:
 
 volumes:
   postgres_data:
+
+
+  # Перевірити, чи React фронтенд не намагається підкл до http://localhost:8000.
+# У frontend/.env або у коді виправити:
+
+# VITE_API_URL=http://localhost:8001
+

@@ -49,7 +49,7 @@ class UserCreate(BaseModel):
     username: str
     email: str
     password: str
-    role: UserRole
+    # role: UserRole
 
 
 # Схема для токену
