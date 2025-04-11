@@ -61,3 +61,23 @@ class UserService:
             print(f"✅ Verification email sent to {email}")
         except Exception as e:
             print(f"❌ Failed to send email: {e}")
+            
+    async def send_password_reset_email(self, email: str, token: str):
+        reset_link = f"http://localhost:3000/reset-password?token={token}"  # frontend route
+        msg = MIMEText(f"Click the link to reset your password: {reset_link}")
+        msg["Subject"] = "Password Reset Request"
+        msg["From"] = config.SMTP_USERNAME
+        msg["To"] = email    
+
+        try:
+            await aiosmtplib.send(
+                message=msg.as_string(),
+                hostname=config.SMTP_SERVER,
+                port=config.SMTP_PORT,
+                username=config.SMTP_USERNAME,
+                password=config.SMTP_PASSWORD,
+                start_tls=True,
+            )
+            print(f"✅ Password reset email sent to {email}")
+        except Exception as e:
+            print(f"❌ Failed to send password reset email: {e}")

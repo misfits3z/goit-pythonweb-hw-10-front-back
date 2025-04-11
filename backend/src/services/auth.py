@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta, UTC
-from typing import Optional
 
 from fastapi import Depends, HTTPException, status
 from passlib.context import CryptContext
@@ -25,20 +23,6 @@ class Hash:
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
-
-
-# define a function to generate a new access token
-async def create_access_token(data: dict, expires_delta: Optional[int] = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(UTC) + timedelta(seconds=expires_delta)
-    else:
-        expire = datetime.now(UTC) + timedelta(seconds=config.JWT_EXPIRATION_SECONDS)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(
-        to_encode, config.JWT_SECRET, algorithm=config.JWT_ALGORITHM
-    )
-    return encoded_jwt
 
 
 async def get_current_user(

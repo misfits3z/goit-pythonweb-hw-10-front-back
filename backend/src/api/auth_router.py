@@ -1,13 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
-from src.schemas import UserCreate, Token, User
-from src.services.auth import create_access_token, Hash
+from src.schemas import UserCreate, Token, User, RequestPasswordReset, PasswordResetConfirm
+from src.services.auth import  Hash
 from src.services.users import UserService
 from src.database.db import get_db
 from src.conf.config import config
 from jose import jwt, JWTError
-
+from src.utils.tokens import generate_password_reset_token, create_access_token
 
 
 router  = APIRouter(tags=["auth"])
@@ -73,3 +73,44 @@ async def verify_email(token: str, db: Session = Depends(get_db)):
     user.is_verified = True  # Підтверджуємо email
     await db.commit()
     return {"message": "Email successfully verified"}
+
+
+@router.post("/password-reset-email", status_code=status.HTTP_200_OK)
+async def request_password_reset(
+    body: RequestPasswordReset,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    user_service = UserService(db)
+    user = await user_service.get_user_by_email(body.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    token = generate_password_reset_token(user.email)
+
+    background_tasks.add_task(user_service.send_password_reset_email, user.email, token)
+
+    return {"message": "Password reset email sent"}
+
+
+@router.post("/password-reset-confirm", status_code=status.HTTP_200_OK)
+async def password_reset_confirm(
+    data: PasswordResetConfirm, db: Session = Depends(get_db)
+):
+    try:
+        payload = jwt.decode(
+            data.token, config.JWT_SECRET, algorithms=[config.JWT_ALGORITHM]
+        )
+        email = payload["sub"]
+    except JWTError:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+
+    user_service = UserService(db)
+    user = await user_service.get_user_by_email(email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.password = user_service.get_password_hash(data.new_password)
+    await db.commit()
+
+    return {"message": "Password reset successfully"}
