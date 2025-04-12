@@ -17,6 +17,21 @@ async def create_admin(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_admin_user),  # перевірка ролі
 ):
+    """
+    Create a new admin user. Only accessible by authenticated admin users.
+
+    Args:
+        body (UserCreate): User data for the new admin.
+        db (Session): Database session.
+        current_user: The currently authenticated admin user (authorization check).
+
+    Returns:
+        User: The created admin user.
+
+    Raises:
+        HTTPException: If a user with the same email already exists.
+    """
+
     user_service = UserService(db)
 
     existing_user = await user_service.get_user_by_email(body.email)

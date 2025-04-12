@@ -6,6 +6,14 @@ from src.database.models import Contact
 
 
 async def seed_contacts():
+    """
+    Seeds the database with dummy contact data.
+
+    This function creates a list of fake contacts with random information such as names,
+    email addresses, phone numbers, and birth dates. It then adds these contacts to
+    the database using an asynchronous session and commits the changes.
+    
+    """
     # Створення кількох фіктивних контактів
     contacts = [
         Contact(
@@ -76,6 +84,11 @@ async def seed_contacts():
 
 # Запуск асинхронної функції
 async def main():
+    """
+    Entry point for running the seeding process.
+
+    This function calls `seed_contacts()` to add the dummy contact data to the database.
+    """
     await seed_contacts()
 
 

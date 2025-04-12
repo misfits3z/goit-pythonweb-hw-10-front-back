@@ -6,6 +6,21 @@ load_dotenv()
 
 
 class Config:
+    """
+    Config class for application settings loaded from environment variables.
+
+    Attributes:
+        DB_URL (str): Database connection URL.
+        JWT_SECRET (str): Secret key for encoding access JWTs.
+        JWT_ALGORITHM (str): Algorithm used to sign JWT tokens.
+        JWT_EXPIRATION_SECONDS (int): Lifetime of access JWTs in seconds.
+        JWT_SECRET_REFRESH (str): Secret key for encoding refresh JWTs.
+        JWT_REFRESH_EXPIRATION_SECONDS (int): Lifetime of refresh JWTs in seconds.
+        SMTP_SERVER (str): SMTP server address for email sending.
+        SMTP_PORT (int): Port used by the SMTP server.
+        SMTP_USERNAME (str): SMTP username.
+        SMTP_PASSWORD (str): SMTP password.
+    """
     # Database
     DB_URL = os.getenv("DB_URL")
 
