@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Body
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from src.schemas import UserCreate, Token, User, RequestPasswordReset, PasswordResetConfirm
@@ -7,7 +7,7 @@ from src.services.users import UserService
 from src.database.db import get_db
 from src.conf.config import config
 from jose import jwt, JWTError
-from src.utils.tokens import generate_password_reset_token, create_access_token
+from src.utils.tokens import generate_password_reset_token, create_access_token, create_refresh_token
 
 
 router  = APIRouter(tags=["auth"])
@@ -52,7 +52,32 @@ async def login_user(
         )
 
     access_token = await create_access_token(data={"sub": user.username})
-    return {"access_token": access_token, "token_type": "bearer"}
+    refresh_token = await create_refresh_token(data={"sub": user.username})
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
+
+
+@router.post("/refresh", response_model=Token)
+async def refresh_access_token(refresh_token: str = Body(...)):
+    try:
+        payload = jwt.decode(
+            refresh_token, config.JWT_SECRET_REFRESH, algorithms=[config.JWT_ALGORITHM]
+        )
+        username = payload.get("sub")
+        if not username:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+
+    new_access_token = await create_access_token(data={"sub": username})
+    return {
+        "access_token": new_access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
 
 
 @router.get("/verify-email")

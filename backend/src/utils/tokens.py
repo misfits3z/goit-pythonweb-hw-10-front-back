@@ -32,3 +32,18 @@ def generate_password_reset_token(email: str) -> str:
         to_encode, config.JWT_SECRET, algorithm=config.JWT_ALGORITHM
     )
     return encoded_jwt
+
+
+async def create_refresh_token(data: dict, expires_delta: Optional[int] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(UTC) + timedelta(seconds=expires_delta)
+    else:
+        expire = datetime.now(UTC) + timedelta(
+            seconds=config.JWT_REFRESH_EXPIRATION_SECONDS
+        )
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(
+        to_encode, config.JWT_SECRET_REFRESH, algorithm=config.JWT_ALGORITHM
+    )
+    return encoded_jwt
