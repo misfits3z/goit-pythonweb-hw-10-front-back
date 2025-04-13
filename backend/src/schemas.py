@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from typing import  Optional
-from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, ConfigDict
 from src.database.models import UserRole
 
 
@@ -20,13 +20,12 @@ class ContactCreate(BaseModel):
 
     first_name: str = Field(..., max_length=50)
     last_name: str = Field(..., max_length=50)
-    email: str = Field(max_length=50)
-    phone_number: str = Field(max_length=50)
+    email: str = Field(..., max_length=50)
+    phone_number: str = Field(..., max_length=50)
     birth_date: date
-    note: Optional[str] = Field(max_length=250)
+    note: Optional[str] = Field(default=None, max_length=250)
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Модель для відповіді, що містить дані про контакт
@@ -156,11 +155,11 @@ class PasswordResetConfirm(BaseModel):
 #     phone_number: str
 #     birth_date: datetime
 #     note: Optional[str] = None
-#     created_at: datetime | None  
+#     created_at: datetime | None
 #     updated_at: Optional[
 #         datetime
-#     ] 
-#     model_config = ConfigDict(from_attributes=True)  
+#     ]
+#     model_config = ConfigDict(from_attributes=True)
 
 
 # # Схема користувача

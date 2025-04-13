@@ -4,6 +4,8 @@ from fastapi.responses import Response
 from src.api import utils, contacts, auth_router, users, create_admin
 import os
 
+# source $(poetry env info --path)/bin/activate
+
 app = FastAPI(debug=True)
 
 # 👇 Дозволяємо CORS

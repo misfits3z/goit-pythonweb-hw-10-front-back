@@ -36,4 +36,5 @@ packages = [{include = "src"}]
 
 [tool.poetry.group.dev.dependencies]
 sphinx = "^8.2.3"
+pytest-asyncio = "^0.26.0"
 
