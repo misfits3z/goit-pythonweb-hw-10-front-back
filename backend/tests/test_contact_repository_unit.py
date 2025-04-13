@@ -6,7 +6,7 @@ from datetime import date
 
 from src.database.models import Contact, User
 from src.repository.contacts import ContactRepository
-from src.schemas import ContactResponse, ContactCreate
+from src.schemas import ContactCreate
 
 
 @pytest.fixture
