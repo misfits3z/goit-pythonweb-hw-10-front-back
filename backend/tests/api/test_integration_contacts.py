@@ -48,14 +48,14 @@ def test_create_contact(client, get_token):
     assert data["email"] == contact_data["email"]
 
 
-# @pytest.mark.asyncio
-# async def test_read_contacts(client, get_token):
-#     token = get_token
-#     headers = {"Authorization": f"Bearer {token}"}
-#     async with AsyncClient(app=app, base_url="http://test") as ac:
-#         response = await ac.get("/contacts/", headers=headers)
-#     assert response.status_code == 200
-#     assert isinstance(response.json(), list)
+@pytest.mark.asyncio
+async def test_read_contacts(client, get_token):
+    token = get_token
+    headers = {"Authorization": f"Bearer {token}"}
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        response = await ac.get("/contacts/", headers=headers)
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
 
 
 # @pytest.mark.asyncio
