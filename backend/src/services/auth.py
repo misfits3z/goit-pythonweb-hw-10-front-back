@@ -48,9 +48,76 @@ class Hash:
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
+# async def get_current_user(
+#     token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+# ) -> UserSchema:
+#     """
+#     Retrieves the current user from the OAuth2 token.
+
+#     Args:
+#         token (str): The OAuth2 token to verify and decode.
+#         db (Session): The database session for querying user data.
+
+#     Returns:
+#         UserSchema: The schema representing the authenticated user.
+
+#     Raises:
+#         HTTPException: If the credentials are invalid or expired.
+#     """
+#     credentials_exception = HTTPException(
+#         status_code=status.HTTP_401_UNAUTHORIZED,
+#         detail="Could not validate credentials",
+#         headers={"WWW-Authenticate": "Bearer"},
+#     )
+
+#     try:
+#         payload = jwt.decode(
+#             token, config.JWT_SECRET, algorithms=[config.JWT_ALGORITHM]
+#         )
+#         username: str = payload.get("sub")
+#         if username is None:
+#             raise credentials_exception
+#     except JWTError as e:
+#         print(f"JWT decode error: {e}")
+#         raise credentials_exception
+
+#     # Check in Redis cache
+#     redis_key = f"user:{username}"
+#     cached_user = await redis_client.hgetall(redis_key)
+#     if cached_user:
+#         try:
+#             cached_user["id"] = int(cached_user["id"])
+#             cached_user["role"] = UserRole(cached_user["role"])
+#             return UserSchema(**cached_user)
+#         except Exception:
+#             await redis_client.delete(redis_key)
+
+#     # Fallback to DB
+#     user_service = UserService(db)
+#     user: User = await user_service.get_user_by_username(username)
+#     if user is None:
+#         raise credentials_exception
+
+#     user_schema = UserSchema.model_validate(user)
+
+#     # Cache user data in Redis
+#     await redis_client.hset(
+#         redis_key,
+#         mapping={
+#             "id": str(user_schema.id),
+#             "username": user_schema.username,
+#             "email": user_schema.email,
+#             "role": user_schema.role.value,
+#             "avatar": user_schema.avatar or "",
+#         },
+#     )
+#     await redis_client.expire(redis_key, 600)  # Cache for 10 minutes
+
+
+#     return user_schema
 async def get_current_user(
     token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
-) -> UserSchema:
+) -> User:
     """
     Retrieves the current user from the OAuth2 token.
 
@@ -59,7 +126,7 @@ async def get_current_user(
         db (Session): The database session for querying user data.
 
     Returns:
-        UserSchema: The schema representing the authenticated user.
+        User: The ORM object representing the authenticated user.
 
     Raises:
         HTTPException: If the credentials are invalid or expired.
@@ -86,9 +153,10 @@ async def get_current_user(
     cached_user = await redis_client.hgetall(redis_key)
     if cached_user:
         try:
-            cached_user["id"] = int(cached_user["id"])
-            cached_user["role"] = UserRole(cached_user["role"])
-            return UserSchema(**cached_user)
+            user_id = int(cached_user["id"])
+            user = db.query(User).get(user_id)
+            if user:
+                return user
         except Exception:
             await redis_client.delete(redis_key)
 
@@ -98,22 +166,20 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
 
-    user_schema = UserSchema.model_validate(user)
-
     # Cache user data in Redis
     await redis_client.hset(
         redis_key,
         mapping={
-            "id": str(user_schema.id),
-            "username": user_schema.username,
-            "email": user_schema.email,
-            "role": user_schema.role.value,
-            "avatar": user_schema.avatar or "",
+            "id": str(user.id),
+            "username": user.username,
+            "email": user.email,
+            "role": user.role.value,
+            "avatar": user.avatar or "",
         },
     )
     await redis_client.expire(redis_key, 600)  # Cache for 10 minutes
 
-    return user_schema
+    return user  # повертаємо ORM-об'єкт
 
 
 def get_current_admin_user(current_user: UserSchema = Depends(get_current_user)):

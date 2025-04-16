@@ -20,8 +20,8 @@ class ContactCreate(BaseModel):
 
     first_name: str = Field(..., max_length=50)
     last_name: str = Field(..., max_length=50)
-    email: str = Field(..., max_length=50)
-    phone_number: str = Field(..., max_length=50)
+    email: str = Field(..., max_length=255)
+    phone_number: str = Field(..., max_length=20)
     birth_date: date
     note: Optional[str] = Field(default=None, max_length=250)
 
@@ -50,7 +50,7 @@ class ContactResponse(ContactCreate):
     last_name: str
     email: str
     phone_number: str
-    birth_date: datetime
+    birth_date: date
     note: Optional[str] = None
     created_at: datetime | None
     updated_at: Optional[datetime]
@@ -106,6 +106,7 @@ class Token(BaseModel):
     """
 
     access_token: str
+    refresh_token: str
     token_type: str
 
 

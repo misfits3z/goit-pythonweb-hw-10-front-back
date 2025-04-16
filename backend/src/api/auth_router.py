@@ -87,7 +87,7 @@ async def login_user(
 
 
 @router.post("/refresh", response_model=Token)
-async def refresh_access_token(refresh_token: str = Body(...)):
+async def refresh_access_token(refresh_token: str = Body(..., embed=True)):
     """
     Generate a new access token using a valid refresh token.
 
@@ -149,7 +149,7 @@ async def verify_email(token: str, db: Session = Depends(get_db)):
 
     user.is_verified = True  # Підтверджуємо email
     await db.commit()
-    return {"message": "Email successfully verified"}
+    return {"message": "Email verified successfully"}
 
 
 @router.post("/password-reset-email", status_code=status.HTTP_200_OK)
@@ -181,7 +181,7 @@ async def request_password_reset(
 
     background_tasks.add_task(user_service.send_password_reset_email, user.email, token)
 
-    return {"message": "Password reset email sent"}
+    return {"message": "Password reset instructions sent to your email"}
 
 
 @router.post("/password-reset-confirm", status_code=status.HTTP_200_OK)
@@ -214,7 +214,8 @@ async def password_reset_confirm(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    user.password = user_service.get_password_hash(data.new_password)
+    hash_service = Hash()
+    user.password = hash_service.get_password_hash(data.new_password)
     await db.commit()
 
     return {"message": "Password reset successfully"}

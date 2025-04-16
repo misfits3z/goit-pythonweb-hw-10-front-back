@@ -1,9 +1,10 @@
+
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 from fastapi import HTTPException
 from src.services.auth import get_current_user, get_current_admin_user
 from src.schemas import User as UserSchema
-from src.database.models import UserRole
+from src.database.models import UserRole, User
 from jose import JWTError
 
 
@@ -34,6 +35,7 @@ def admin_user_schema():
     )
 
 
+# Тест для перевірки ORM моделі User:
 @pytest.mark.asyncio
 async def test_get_current_user_from_cache(valid_payload, user_schema):
     with patch("src.services.auth.jwt.decode", return_value=valid_payload), patch(
@@ -48,9 +50,25 @@ async def test_get_current_user_from_cache(valid_payload, user_schema):
             }
         ),
     ):
-        result = await get_current_user(token="token", db=MagicMock())
-        assert isinstance(result, UserSchema)
+        db_mock = MagicMock()
+        # Створюємо мок для db.query(User).get(), щоб він повертав реальний екземпляр User
+        db_mock.query(User).get.return_value = User(
+            id=1,
+            username="testuser",
+            email="test@example.com",
+            avatar="avatar.png",
+            role=UserRole.USER,
+        )
+
+        result = await get_current_user(token="token", db=db_mock)
+
+        # Перевіряємо, що результат є ORM моделлю User
+        assert isinstance(result, User)
+
+        # Перевіряємо значення
         assert result.username == "testuser"
+        assert result.email == "test@example.com"
+        assert result.role == UserRole.USER
 
 
 @pytest.mark.asyncio
