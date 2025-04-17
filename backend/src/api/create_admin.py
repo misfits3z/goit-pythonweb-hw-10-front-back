@@ -6,7 +6,7 @@ from src.services.users import UserService
 from src.database.db import get_db
 from src.services.auth import get_current_admin_user  
 
-router = APIRouter(prefix="/admin", tags=["Admin"])
+router = APIRouter( tags=["Admin"])
 
 
 @router.post(

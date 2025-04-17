@@ -100,13 +100,13 @@ async def test_get_current_user_invalid_token():
 
 @pytest.mark.asyncio
 async def test_get_current_admin_user_success(admin_user_schema):
-    result = get_current_admin_user(admin_user_schema)
+    result = await get_current_admin_user(admin_user_schema)
     assert result.role == UserRole.ADMIN
 
 
 @pytest.mark.asyncio
 async def test_get_current_admin_user_forbidden(user_schema):
     with pytest.raises(HTTPException) as exc_info:
-        get_current_admin_user(user_schema)
+        await get_current_admin_user(user_schema)
     assert exc_info.value.status_code == 403
     assert exc_info.value.detail == "Недостатньо прав доступу"

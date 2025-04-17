@@ -1,10 +1,12 @@
-from typing import List
+from typing import List, Optional
+from sqlalchemy.sql import or_, and_, extract
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.models import Contact, User
 from src.schemas import ContactCreate
+from datetime import date
 
 
 class ContactRepository:
@@ -60,7 +62,7 @@ class ContactRepository:
             Contact: The created Contact object.
         """
         contact = Contact(**body.model_dump(exclude_unset=True), user=user)
-        # await 
+        # await
         self.db.add(contact)
         await self.db.commit()
         await self.db.refresh(contact)
@@ -123,6 +125,95 @@ class ContactRepository:
             list[Contact]: A list of Contact objects.
         """
         stmt = select(Contact).where(Contact.id.in_(contact_ids), Contact.user == user)
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
+
+    async def search_contacts(
+        self,
+        skip: int,
+        limit: int,
+        first_name: Optional[str],
+        last_name: Optional[str],
+        email: Optional[str],
+        user: User,
+    ) -> List[Contact]:
+        """
+        Search for contacts by first name, last name, or email for a specific user.
+
+        Args:
+            skip (int): The number of records to skip.
+            limit (int): The maximum number of records to retrieve.
+            first_name (Optional[str]): The first name to search for.
+            last_name (Optional[str]): The last name to search for.
+            email (Optional[str]): The email to search for.
+            user (User): The user whose contacts are being searched.
+
+        Returns:
+            List[Contact]: A list of contacts matching the search criteria.
+        """
+        stmt = select(Contact)
+
+        if first_name:
+            stmt = stmt.filter(Contact.first_name.ilike(f"%{first_name}%"))
+        if last_name:
+            stmt = stmt.filter(Contact.last_name.ilike(f"%{last_name}%"))
+        if email:
+            stmt = stmt.filter(Contact.email.ilike(f"%{email}%"))
+        stmt = stmt.filter_by(user=user).offset(skip).limit(limit)
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
+
+    async def get_upcoming_birthdays(
+        self, today: date, next_date: date, skip: int, limit: int, user: User
+    ) -> List[Contact]:
+        """
+        Retrieve contacts with upcoming birthdays within a specified date range.
+
+        Args:
+            today (date): The start date of the range.
+            next_date (date): The end date of the range.
+            skip (int): The number of records to skip.
+            limit (int): The maximum number of records to retrieve.
+            user (User): The user whose contacts are being retrieved.
+
+        Returns:
+            List[Contact]: A list of contacts with upcoming birthdays.
+        """
+
+        start_day_of_year = today.timetuple().tm_yday
+        end_day_of_year = next_date.timetuple().tm_yday
+
+        if start_day_of_year <= end_day_of_year:
+            stmt = (
+                select(Contact)
+                .filter_by(user=user)
+                .filter(
+                    or_(
+                        and_(
+                            extract("doy", Contact.birth_date) >= start_day_of_year,
+                            extract("doy", Contact.birth_date) <= end_day_of_year,
+                        )
+                    )
+                )
+                .order_by(extract("doy", Contact.birth_date))
+                .offset(skip)
+                .limit(limit)
+            )
+        else:
+            stmt = (
+                select(Contact)
+                .filter_by(user=user)
+                .filter(
+                    or_(
+                        extract("doy", Contact.birth_date) >= start_day_of_year,
+                        extract("doy", Contact.birth_date) <= end_day_of_year,
+                    )
+                )
+                .order_by(extract("doy", Contact.birth_date))
+                .offset(skip)
+                .limit(limit)
+            )
+
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
