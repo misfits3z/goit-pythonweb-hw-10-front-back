@@ -48,71 +48,66 @@ def test_create_contact(client, get_token):
     assert data["email"] == contact_data["email"]
 
 
-@pytest.mark.asyncio
-async def test_read_contacts(client, get_token):
+def test_read_contacts(client, get_token):
     token = get_token
     headers = {"Authorization": f"Bearer {token}"}
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        response = await ac.get("/contacts/", headers=headers)
+    response = client.get("api/contacts/", headers=headers)
     assert response.status_code == 200
-    assert isinstance(response.json(), list)
 
 
-# @pytest.mark.asyncio
-# async def test_read_single_contact(client, get_token):
-#     token = get_token
-#     headers = {"Authorization": f"Bearer {token}"}
-#     contact_data = {
-#         "first_name": "Peter",
-#         "last_name": "Parker",
-#         "email": "spiderman@marvel.com",
-#         "phone": "777-888-9999",
-#         "birthday": "2001-08-10",
-#     }
-#     async with AsyncClient(app=app, base_url="http://test") as ac:
-#         create_response = await ac.post(
-#             "/contacts/", json=contact_data, headers=headers
-#         )
-#         contact_id = create_response.json()["id"]
-
-#         response = await ac.get(f"/contacts/{contact_id}", headers=headers)
-#     assert response.status_code == 200
-#     assert response.json()["email"] == "spiderman@marvel.com"
-#     assert response.json()["first_name"] == "Peter"
+def test_get_contact(client, get_token):
+    response = client.get(
+        "/api/contacts/1", headers={"Authorization": f"Bearer {get_token}"}
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["first_name"] == "Bruce"
+    assert "id" in data
 
 
-# @pytest.mark.asyncio
-# async def test_update_contact(client, get_token):
-#     token = get_token
-#     headers = {"Authorization": f"Bearer {token}"}
-#     contact_data = {
-#         "first_name": "Natasha",
-#         "last_name": "Romanoff",
-#         "email": "blackwidow@shield.org",
-#         "phone": "123-000-0001",
-#         "birthday": "1984-11-22",
-#     }
+def test_get_contact_not_found(client, get_token):
+    response = client.get(
+        "/api/contacts/2", headers={"Authorization": f"Bearer {get_token}"}
+    )
+    assert response.status_code == 404, response.text
+    data = response.json()
+    assert data["detail"] == "Contact not found"
 
-#     updated_data = {
-#         "first_name": "Nat",
-#         "last_name": "Romanoff",
-#         "email": "natasha@avengers.com",
-#         "phone": "999-999-9999",
-#         "birthday": "1984-11-22",
-#     }
 
-#     async with AsyncClient(app=app, base_url="http://test") as ac:
-#         create_response = await ac.post(
-#             "/contacts/", json=contact_data, headers=headers
-#         )
-#         contact_id = create_response.json()["id"]
+@pytest.mark.asyncio
+async def test_update_contact(client, get_token):
+    token = get_token
+    headers = {"Authorization": f"Bearer {token}"}
+    contact_data = {
+        "first_name": "Natasha",
+        "last_name": "Romanoff",
+        "email": "blackwidow@shield.org",
+        "phone_number": "123-000-0001",
+        "birth_date": "1984-11-22",
+    }
 
-#         response = await ac.put(
-#             f"/contacts/{contact_id}", json=updated_data, headers=headers
-#         )
-#     assert response.status_code == 200
-#     assert response.json()["email"] == "natasha@avengers.com"
-#     assert response.json()["first_name"] == "Nat"
+    updated_data = {
+        "first_name": "Nat",
+        "last_name": "Romanoff",
+        "email": "natasha@avengers.com",
+        "phone_number": "999-999-9999",
+        "birth_date": "1984-11-22",
+    }
+
+    transport = ASGITransport(app=app)
+    
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        create_response = await ac.post(
+            "/contacts/", json=contact_data, headers=headers
+        )
+        contact_id = create_response.json()["id"]
+
+        response = await ac.put(
+            f"/contacts/{contact_id}", json=updated_data, headers=headers
+        )
+    assert response.status_code == 200
+    assert response.json()["email"] == "natasha@avengers.com"
+    assert response.json()["first_name"] == "Nat"
 
 
 # @pytest.mark.asyncio
