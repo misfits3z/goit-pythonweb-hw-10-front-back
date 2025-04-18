@@ -43,9 +43,11 @@ async def test_update_avatar_for_admin(client, get_token_admin):
         json={"new_avatar": new_avatar},
         headers={"Authorization": f"Bearer {get_token_admin}"},
     )
-
+    print("RESPONSE STATUS:", response.status_code)
+    print("RESPONSE DATA:", response.json())
     # Перевірка статусу
     assert response.status_code == status.HTTP_200_OK
+
 
     # Перевірка аватара
     response_data = response.json()
@@ -53,38 +55,33 @@ async def test_update_avatar_for_admin(client, get_token_admin):
     assert response_data["avatar"] == new_avatar
 
 
-# @pytest.mark.asyncio
-# async def test_update_avatar_for_non_admin(client, get_token):
-#     # Запит на зміну аватара для користувача без прав адміністратора
-#     new_avatar = "https://new-avatar.com/avatar.png"
-#     response = client.patch(
-#         "/api/users/avatar",
-#         json={"new_avatar": new_avatar},
-#         headers={"Authorization": f"Bearer {get_token}"},
-#     )
 
-#     # Перевірка статусу (403 — заборонено)
-#     assert response.status_code == status.HTTP_403_FORBIDDEN
-#     assert (
-#         response.json()["detail"]
-#         == "Тільки адміністратор може змінити аватар за замовчуванням"
-#     )
+@pytest.mark.asyncio
+async def test_debug_token(client, get_token_admin):
+    print(f"🪪 Token: {get_token_admin}")
+    response = client.get(
+        "/api/users/me",
+        headers={"Authorization": f"Bearer {get_token_admin}"},
+    )
+    print(response.status_code)
+    print(response.json())
 
 
-# @pytest.mark.asyncio
-# async def test_update_avatar_user_not_found(client, get_token_admin):
-#     # Вимкнути або змінити дані користувача для тесту
-#     async with TestingSessionLocal() as session:
-#         await session.execute("DELETE FROM users WHERE username = 'admin'")
+@pytest.mark.asyncio
+async def test_update_avatar_for_non_admin(client, get_token):
+    # не адміністратор
+    new_avatar = "https://new-avatar.com/avatar.png"
+    response = client.patch(
+        "/api/users/avatar",
+        json={"new_avatar": new_avatar},
+        headers={"Authorization": f"Bearer {get_token}"},
+    )
 
-#     # Запит на зміну аватара для адміністратора, коли користувач відсутній
-#     new_avatar = "https://new-avatar.com/avatar.png"
-#     response = client.patch(
-#         "/api/users/avatar",
-#         json={"new_avatar": new_avatar},
-#         headers={"Authorization": f"Bearer {get_token_admin}"},
-#     )
+    # Перевірка статусу (403 — заборонено)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert (
+        response.json()["detail"]
+        == "Тільки адміністратор може змінити аватар за замовчуванням"
+    )
 
-#     # Перевірка статусу (404 — не знайдено)
-#     assert response.status_code == status.HTTP_404_NOT_FOUND
-#     assert response.json()["detail"] == "Користувача не знайдено"
+

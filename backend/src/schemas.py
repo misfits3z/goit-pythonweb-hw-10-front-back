@@ -132,6 +132,9 @@ class PasswordResetConfirm(BaseModel):
 
     token: str
     new_password: str = Field(min_length=6)
+    
+class AvatarUpdateSchema(BaseModel):
+    new_avatar: str
 
 
 # # Модель для створення контакту

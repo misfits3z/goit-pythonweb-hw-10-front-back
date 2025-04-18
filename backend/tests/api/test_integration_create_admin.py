@@ -1,29 +1,31 @@
-import pytest
-from httpx import AsyncClient, ASGITransport
+
 from main import app
+from fastapi import status
+from httpx import AsyncClient, ASGITransport
+import pytest
 
 
 
+@pytest.mark.asyncio
+async def test_create_admin_success(client, get_token_admin):
+    # Підготовка
+    new_admin_data = {
+        "username": "newadmin",
+        "email": "newadmin@example.com",
+        "password": "securepassword123",
+    }
 
-# @pytest.mark.asyncio
-# async def test_create_admin_user(get_token_admin):
-#     token =  get_token_admin 
+    headers = {"Authorization": f"Bearer {get_token_admin}"}
 
-#     payload = {
-#         "username": "newadmin",
-#         "email": "newadmin@example.com",
-#         "password": "StrongPass123",
-#     }
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.post("/api/create-admin", json=new_admin_data, headers=headers)
 
-#     transport = ASGITransport(app=app)
-#     async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
-#         response = await ac.post(
-#             "/api/create-admin",
-#             json=payload,
-#             headers={"Authorization": f"Bearer {token}"},
-#         )
-
-#     assert response.status_code == 201
-#     data = response.json()
-#     assert data["email"] == payload["email"]
-#     assert data["role"] == "admin"
+    # Перевірка
+    assert response.status_code == status.HTTP_201_CREATED
+    data = response.json()
+    assert data["username"] == new_admin_data["username"]
+    assert data["email"] == new_admin_data["email"]
+    assert data["role"] == "admin"
+    assert "id" in data
+    

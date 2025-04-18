@@ -2,6 +2,7 @@ import asyncio
 import pickle
 from unittest.mock import patch, AsyncMock
 import time
+from sqlalchemy.future import select
 
 import pytest
 import pytest_asyncio
@@ -44,13 +45,31 @@ test_user = {
     
 }
 
-test_admin_user = User(
-    username="pool",
-    email="pool@example.com",
-    hashed_password=Hash().get_password_hash("12345678"), 
-    role="admin",
-   
-)
+# test_admin_user = User(
+#     username="pool",
+#     email="pool@example.com",
+#     hashed_password=Hash().get_password_hash("12345678"),
+#     role="admin",
+
+# )
+
+
+# @pytest_asyncio.fixture(scope="module", autouse=True)
+# async def init_models_wrap():
+#     async with engine.begin() as conn:
+#         await conn.run_sync(Base.metadata.drop_all)
+#         await conn.run_sync(Base.metadata.create_all)
+#     async with TestingSessionLocal() as session:
+#         hash_password = Hash().get_password_hash(test_user["password"])
+#         current_user = User(
+#             username=test_user["username"],
+#             email=test_user["email"],
+#             hashed_password=hash_password,
+#             is_verified=True,
+#             avatar="https://twitter.com/gravatar",
+#         )
+#         session.add(current_user)
+#         await session.commit()
 
 
 @pytest_asyncio.fixture(scope="module", autouse=True)
@@ -58,7 +77,9 @@ async def init_models_wrap():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
+
     async with TestingSessionLocal() as session:
+        # Створення звичайного користувача
         hash_password = Hash().get_password_hash(test_user["password"])
         current_user = User(
             username=test_user["username"],
@@ -68,7 +89,22 @@ async def init_models_wrap():
             avatar="https://twitter.com/gravatar",
         )
         session.add(current_user)
+
+        # Створення адміністратора
+        hash_admin_pass = Hash().get_password_hash("adminpassword")
+        admin_user = User(
+            username="admin",
+            email="admin@example.com",
+            hashed_password=hash_admin_pass,
+            is_verified=True,
+            avatar="https://twitter.com/adminavatar",
+            role=UserRole.ADMIN,  
+        )
+        session.add(admin_user)
+
         await session.commit()
+        await session.refresh(current_user)
+        await session.refresh(admin_user)
 
 
 @pytest.fixture(scope="module")
@@ -95,45 +131,29 @@ async def get_token():
     return token
 
 
+# @pytest_asyncio.fixture()
+# async def get_token_admin(init_models_wrap):
+#     async with TestingSessionLocal() as session:
+#         hash_password = Hash().get_password_hash("adminpass123")
+#         admin_user = User(
+#             username="admin",
+#             email="admin@example.com",
+#             hashed_password=hash_password,
+#             role=UserRole.ADMIN,
+#             is_verified=True,
+#         )
+#         session.add(admin_user)
+#         await session.commit()
+#         await session.refresh(admin_user)
+
+#     token = await create_access_token(data={"sub": admin_user.email})
+#     return token
+
+
 @pytest_asyncio.fixture()
 async def get_token_admin(init_models_wrap):
-    async with TestingSessionLocal() as session:
-        hash_password = Hash().get_password_hash("adminpass123")
-        admin_user = User(
-            username="admin",
-            email="admin@example.com",
-            hashed_password=hash_password,
-            role=UserRole.ADMIN,
-            is_verified=True,
-        )
-        session.add(admin_user)
-        await session.commit()
-        await session.refresh(admin_user)
-
-    token = await create_access_token(data={"sub": admin_user.email})
+    token = await create_access_token(data={"sub": "admin@example.com"})
     return token
-
-
-# @pytest.fixture(autouse=True)
-# def mock_redis_client():
-#     targets = [
-#         "src.services.auth.redis_client",
-#         "src.api.users.redis_client",
-#     ]
-#     patchers = [patch(target, new_callable=AsyncMock) for target in targets]
-#     mocks = [p.start() for p in patchers]
-
-#     for mock in mocks:
-#         mock.hgetall.return_value = {}
-#         mock.hset.return_value = True
-#         mock.expire.return_value = True
-#         mock.delete.return_value = True
-
-#     yield mocks[0]
-
-#     for p in patchers:
-#         p.stop()
-
 
 @pytest.fixture(autouse=True)
 def mock_redis_client():

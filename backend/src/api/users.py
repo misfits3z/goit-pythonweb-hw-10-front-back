@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database.db import get_db
 from src.database.models import UserRole
 from src.core.redis_client import redis_client
+from src.schemas import AvatarUpdateSchema
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -63,7 +64,7 @@ async def me(user: User = Depends(get_current_user)):
 
 @router.patch("/avatar", status_code=status.HTTP_200_OK)
 async def update_avatar_for_admin(
-    new_avatar: str,
+    payload: AvatarUpdateSchema,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -88,6 +89,8 @@ async def update_avatar_for_admin(
             status_code=403,
             detail="Тільки адміністратор може змінити аватар за замовчуванням",
         )
+
+    new_avatar = payload.new_avatar
 
     repo = UserRepository(db)
     updated_user = await repo.update_avatar(current_user.id, new_avatar)
