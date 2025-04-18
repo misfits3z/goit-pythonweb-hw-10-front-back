@@ -36,7 +36,7 @@ async def test_rate_limit(client, get_token):
 
 @pytest.mark.asyncio
 async def test_update_avatar_for_admin(client, get_token_admin):
-    # Запит на зміну аватара для адміністратора
+    # Запит на зміну аватара для адмінa
     new_avatar = "https://new-avatar.com/avatar.png"
     response = client.patch(
         "/api/users/avatar",
@@ -45,7 +45,7 @@ async def test_update_avatar_for_admin(client, get_token_admin):
     )
     print("RESPONSE STATUS:", response.status_code)
     print("RESPONSE DATA:", response.json())
-    # Перевірка статусу
+
     assert response.status_code == status.HTTP_200_OK
 
 

@@ -45,32 +45,6 @@ test_user = {
     
 }
 
-# test_admin_user = User(
-#     username="pool",
-#     email="pool@example.com",
-#     hashed_password=Hash().get_password_hash("12345678"),
-#     role="admin",
-
-# )
-
-
-# @pytest_asyncio.fixture(scope="module", autouse=True)
-# async def init_models_wrap():
-#     async with engine.begin() as conn:
-#         await conn.run_sync(Base.metadata.drop_all)
-#         await conn.run_sync(Base.metadata.create_all)
-#     async with TestingSessionLocal() as session:
-#         hash_password = Hash().get_password_hash(test_user["password"])
-#         current_user = User(
-#             username=test_user["username"],
-#             email=test_user["email"],
-#             hashed_password=hash_password,
-#             is_verified=True,
-#             avatar="https://twitter.com/gravatar",
-#         )
-#         session.add(current_user)
-#         await session.commit()
-
 
 @pytest_asyncio.fixture(scope="module", autouse=True)
 async def init_models_wrap():
@@ -129,25 +103,6 @@ def client():
 async def get_token():
     token = await create_access_token(data={"sub": test_user["username"]})
     return token
-
-
-# @pytest_asyncio.fixture()
-# async def get_token_admin(init_models_wrap):
-#     async with TestingSessionLocal() as session:
-#         hash_password = Hash().get_password_hash("adminpass123")
-#         admin_user = User(
-#             username="admin",
-#             email="admin@example.com",
-#             hashed_password=hash_password,
-#             role=UserRole.ADMIN,
-#             is_verified=True,
-#         )
-#         session.add(admin_user)
-#         await session.commit()
-#         await session.refresh(admin_user)
-
-#     token = await create_access_token(data={"sub": admin_user.email})
-#     return token
 
 
 @pytest_asyncio.fixture()

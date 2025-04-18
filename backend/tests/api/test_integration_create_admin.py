@@ -8,7 +8,7 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_create_admin_success(client, get_token_admin):
-    # Підготовка
+    
     new_admin_data = {
         "username": "newadmin",
         "email": "newadmin@example.com",
