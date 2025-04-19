@@ -1,0 +1,23 @@
+.loaderContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.travelLoader {
+  position: relative;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.travelLoader .react-icons {
+  margin-left: 10px;
+}
+
+.travelLoader span {
+  font-size: 18px;
+  color: var(--button-nav);
+}

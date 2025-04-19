@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import SearchBox from './components/SearchBox/SearchBox';
-import ContactList from './components/ContactList/ContactList';
-import ContactForm from './components/ContactForm/ContactForm';
 import './App.css';
 import { useDispatch } from 'react-redux';
 import { selectContacts } from './redux/contactsSlice';
-import Header from './components/Header/Header';
+import { Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout/Layout';
+import HomePage from './pages/HomePage/HomePage';
+import NotFoundPage from './pages/NotFoundPage/NotFoundPage'
 // import { addContact, deleteContact } from './redux/contactSlice'; 
 // import { changeFilter } from './redux/filtersSlice'; 
 
@@ -21,13 +21,12 @@ function App() {
   }, [dispatch]);
 
   return (
-    <div>
-      <Header/>
-      <h1>Phonebook</h1>
-      <ContactForm />
-      <SearchBox />
-      <ContactList />
-    </div>
+    <Layout>
+      <Routes>
+        <Route path='/' element={<HomePage />} />
+        <Route path='*' element={<NotFoundPage />} />
+      </Routes>
+    </Layout>
   );
 }
 

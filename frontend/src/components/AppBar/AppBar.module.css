@@ -1,0 +1,16 @@
+.header {
+  border-bottom: 1px solid var(--badges);
+  background: var(--inputs);
+  width: 100%;
+}
+
+.headerContent{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  height: 72px;
+  max-width: 1440px;
+  padding: 0 64px;
+  margin: 0 auto;
+}
