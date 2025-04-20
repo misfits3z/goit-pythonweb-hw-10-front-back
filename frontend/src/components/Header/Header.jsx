@@ -6,7 +6,10 @@ import { selectIsAuthenticated } from '../../redux/auth/authSelectors';
 import { useState } from 'react';
 import ModalForm from '../Modal/ModalForm'
 import LoginForm from '../LoginForm/LoginForm'
-import RegisterForm from '../RegisterForm/RegisterForm';
+import { Link } from "react-router-dom";
+import Logo from '../../images/Logo.svg'
+
+
 
 
 const Header = () => {
@@ -26,14 +29,17 @@ const Header = () => {
 
   return (
     <header className={css.header}>
-      <h1 className={css.title}>Phonebook</h1>
+      
+      <Link className={css.logo} to="/">     
+        <img src={Logo} width="136" height="15" />
+      </Link>
       <nav>
         {isAuthenticated ? (
           <button onClick={handleLogout} className={css.btn}>Logout</button>
         ) : (
           <>
             <button className={css.btn} onClick={() => openModal('login')}>Login</button>
-            <button className={css.btn} onClick={() => openModal('register')}>Register</button>
+            
           </>
         )}
       </nav>
@@ -41,7 +47,6 @@ const Header = () => {
       {modalType && (
         <ModalForm onClose={closeModal}>
           {modalType === 'login' && <LoginForm onClose={closeModal} />}
-          {modalType === 'register' && <RegisterForm onClose={closeModal}/>}
         </ModalForm>
       )}
 
